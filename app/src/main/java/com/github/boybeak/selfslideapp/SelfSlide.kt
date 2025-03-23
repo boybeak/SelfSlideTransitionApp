@@ -31,36 +31,36 @@ class SelfSlide private constructor(from: Int, to: Int) : LayoutTransition() {
     init {
         val (inPropertyName, inStartValue) = when (from) {
             TOP -> {
-                Pair("transitionY", -1f)
+                Pair("translationY", -1f)
             }
 
             BOTTOM -> {
-                Pair("transitionY", 1f)
+                Pair("translationY", 1f)
             }
 
             END -> {
-                Pair("transitionX", 1f)
+                Pair("translationX", 1f)
             }
 
             else -> {
-                Pair("transitionX", -1f)
+                Pair("translationX", -1f)
             }
         }
         val (outPropertyName, outEndValue) = when (to) {
             TOP -> {
-                Pair("transitionY", -1f)
+                Pair("translationY", -1f)
             }
 
             BOTTOM -> {
-                Pair("transitionY", 1f)
+                Pair("translationY", 1f)
             }
 
             END -> {
-                Pair("transitionX", 1f)
+                Pair("translationX", 1f)
             }
 
             else -> {
-                Pair("transitionX", -1f)
+                Pair("translationX", -1f)
             }
         }
         val inAnimator = ObjectAnimator.ofFloat(null, inPropertyName, inStartValue, 0f)
@@ -132,7 +132,7 @@ class SelfSlide private constructor(from: Int, to: Int) : LayoutTransition() {
 
         override fun evaluate(fraction: Float, startValue: Any?, endValue: Any?): Any {
             val target = targetView?.get() ?: return 0
-            return (target.width * fraction).apply {
+            return -(target.width * fraction).apply {
                 Log.d(TAG, "evaluate return $this")
             }
         }

@@ -18,7 +18,7 @@ class AnimatedLinearLayout : LinearLayout {
         private const val TAG = "AnimatedLinearLayout"
     }
 
-//    private var currentRunningTargetList = mutableListOf<View>()
+    //    private var currentRunningTargetList = mutableListOf<View>()
     private var appearingTarget: View? = null
     private var runningTarget: View? = null
 
@@ -71,7 +71,9 @@ class AnimatedLinearLayout : LinearLayout {
             setEvaluator { fraction, startValue, endValue ->
                 val target = itemAnimatorListener.getTarget()
                 target?.let { view ->
-                    -view.width * fraction
+                    (-view.width * fraction).apply {
+                        Log.d(TAG, "evaluator return $this")
+                    }
                 } ?: 0f
             }
         }

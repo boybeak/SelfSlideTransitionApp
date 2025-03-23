@@ -14,6 +14,7 @@ import androidx.core.view.setPadding
 
 class MainActivity : AppCompatActivity() {
 
+    private val containerAnimated by lazy { findViewById<LinearLayout>(R.id.containerAnimated) }
     private val container by lazy { findViewById<LinearLayout>(R.id.container) }
     private val addBtn by lazy { findViewById<Button>(R.id.addBtn) }
 
@@ -28,7 +29,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         addBtn.setOnClickListener {
-            container.addView(createView(container.childCount.toString()))
+            val view1 = createView(containerAnimated.childCount.toString())
+            view1.setOnClickListener {
+                containerAnimated.removeView(it)
+            }
+            containerAnimated.addView(view1)
+
+            val view2 = createView(container.childCount.toString())
+            view2.setOnClickListener {
+                container.removeView(it)
+            }
+            container.addView(view2)
         }
 
         container.layoutTransition = SelfSlide.Builder()
@@ -49,9 +60,6 @@ class MainActivity : AppCompatActivity() {
             setPadding(32)
             gravity = Gravity.CENTER
             setBackgroundColor(randomColor())
-            setOnClickListener {
-                container.removeView(it)
-            }
         }
     }
 
