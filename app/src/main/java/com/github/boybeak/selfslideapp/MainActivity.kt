@@ -18,8 +18,8 @@ class MainActivity : AppCompatActivity() {
     private val container by lazy { findViewById<LinearLayout>(R.id.container) }
     private val addBtn by lazy { findViewById<Button>(R.id.addBtn) }
     private val selfSlide = SelfSlide.Builder()
-        .inFrom(SelfSlide.START)
-        .outTo(SelfSlide.BOTTOM)
+        .inFrom(SelfSlide.LEFT)
+        .outTo(SelfSlide.LEFT)
         .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
             view2.setOnClickListener {
                 container.removeView(it)
             }
-            selfSlide.appearingTarget = view2
             container.addView(view2, 0)
         }
 
