@@ -17,6 +17,10 @@ class MainActivity : AppCompatActivity() {
     private val containerAnimated by lazy { findViewById<LinearLayout>(R.id.containerAnimated) }
     private val container by lazy { findViewById<LinearLayout>(R.id.container) }
     private val addBtn by lazy { findViewById<Button>(R.id.addBtn) }
+    private val selfSlide = SelfSlide.Builder()
+        .inFrom(SelfSlide.START)
+        .outTo(SelfSlide.BOTTOM)
+        .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,19 +37,17 @@ class MainActivity : AppCompatActivity() {
             view1.setOnClickListener {
                 containerAnimated.removeView(it)
             }
-            containerAnimated.addView(view1)
+            containerAnimated.addView(view1, 0)
 
             val view2 = createView(container.childCount.toString())
             view2.setOnClickListener {
                 container.removeView(it)
             }
-            container.addView(view2)
+            selfSlide.appearingTarget = view2
+            container.addView(view2, 0)
         }
 
-        container.layoutTransition = SelfSlide.Builder()
-            .inFrom(SelfSlide.START)
-            .outTo(SelfSlide.START)
-            .build()
+        container.layoutTransition = selfSlide
 
     }
 

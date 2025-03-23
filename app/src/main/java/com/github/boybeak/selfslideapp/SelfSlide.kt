@@ -3,18 +3,17 @@ package com.github.boybeak.selfslideapp
 import android.animation.Animator
 import android.animation.LayoutTransition
 import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
-import android.animation.TimeInterpolator
 import android.animation.TypeEvaluator
 import android.animation.ValueAnimator
 import android.graphics.Rect
-import android.os.Build
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.animation.addListener
 import java.lang.ref.WeakReference
-import java.util.ArrayList
 import java.util.HashMap
 import kotlin.math.max
+import kotlin.math.min
 
 class SelfSlide private constructor(from: Int, to: Int) : LayoutTransition() {
 
@@ -26,9 +25,29 @@ class SelfSlide private constructor(from: Int, to: Int) : LayoutTransition() {
         const val BOTTOM = 3
     }
 
-    private val animatorTargetMap = HashMap<Animator, Any?>()
+    private val inAnimatorTargetMap = HashMap<Animator, Any?>()
+    var appearingTarget: View? = null
+
+    private val outAnimatorTargetMap = HashMap<Animator, Any?>()
 
     init {
+        initAppearing(from)
+        initDisappearing(to)
+    }
+
+    override fun addChild(parent: ViewGroup?, child: View?) {
+        Log.d(TAG, "addChild start")
+        super.addChild(parent, child)
+        Log.d(TAG, "addChild end")
+    }
+
+    override fun removeChild(parent: ViewGroup?, child: View?) {
+        Log.d(TAG, "removeChild start")
+        super.removeChild(parent, child)
+        Log.d(TAG, "removeChild end")
+    }
+
+    private fun initAppearing(from: Int) {
         val (inPropertyName, inStartValue) = when (from) {
             TOP -> {
                 Pair("translationY", -1f)
@@ -46,6 +65,45 @@ class SelfSlide private constructor(from: Int, to: Int) : LayoutTransition() {
                 Pair("translationX", -1f)
             }
         }
+
+        /*val innerInAnimator = ObjectAnimator.ofFloat(null, inPropertyName, inStartValue, 0f)
+        val inAnimator = AppearProxyAnimator(
+            innerInAnimator,
+            onSetTarget = { animator, target: Any? ->
+//                appearingTarget = target as? View
+                inAnimatorTargetMap[animator] = target
+            }
+        )*/
+        val inAnimator = ObjectAnimator.ofFloat(null, inPropertyName, inStartValue, 0f)
+        inAnimator.duration = getDuration(APPEARING)
+        inAnimator.setEvaluator { fraction, startValue, endValue ->
+            val target = appearingTarget
+            val value = target?.let { view ->
+                -view.width * (1 - fraction)
+            } ?: 0f
+//            Log.d(TAG, "inAnimator eva.value=$value")
+            value
+        }
+        inAnimator.addListener(
+            onStart = {
+                Log.d(TAG, "inAnimator start")
+            }
+        )
+        /*val inListener = DisappearingListener(
+            APPEARING,
+            dir = from,
+            onGetTarget = { animator ->
+                inAnimatorTargetMap[animator]
+            }
+        )
+        inAnimator.addListener(inListener)
+        inAnimator.addUpdateListener(inListener)
+        inAnimator.setEvaluator(inListener)*/
+
+        setAnimator(APPEARING, inAnimator)
+    }
+
+    private fun initDisappearing(to: Int) {
         val (outPropertyName, outEndValue) = when (to) {
             TOP -> {
                 Pair("translationY", -1f)
@@ -63,30 +121,23 @@ class SelfSlide private constructor(from: Int, to: Int) : LayoutTransition() {
                 Pair("translationX", -1f)
             }
         }
-        val inAnimator = ObjectAnimator.ofFloat(null, inPropertyName, inStartValue, 0f)
-        /*inAnimator.setEvaluator { fraction, startValue, endValue ->
-
-        }*/
-        setAnimator(APPEARING, inAnimator)
-
         val outAnimator = ProxyAnimator(
             ObjectAnimator.ofFloat(null, outPropertyName, 0f, outEndValue),
             onSetTarget = { animator, target: Any? ->
-                Log.d(TAG, "onSetTarget animator=${animator} target=$target")
-                animatorTargetMap[animator] = target
+                outAnimatorTargetMap[animator] = target
             })
         outAnimator.duration = getDuration(DISAPPEARING)
-        val outListener = Listener(
+        val outListener = DisappearingListener(
+            DISAPPEARING,
+            dir = to,
             onGetTarget = { animator ->
-                Log.d(TAG, "onGetTarget animator=${animator}")
-                animatorTargetMap[animator]
+                outAnimatorTargetMap[animator]
             }
         )
         outAnimator.addListener(outListener)
         outAnimator.addUpdateListener(outListener)
         outAnimator.setEvaluator(outListener)
         setAnimator(DISAPPEARING, outAnimator)
-
     }
 
     class Builder {
@@ -108,45 +159,6 @@ class SelfSlide private constructor(from: Int, to: Int) : LayoutTransition() {
         fun build(): SelfSlide {
             return SelfSlide(from, to)
         }
-    }
-
-    private class Listener(private val onGetTarget: (animator: Animator) -> Any?) :
-        Animator.AnimatorListener, ValueAnimator.AnimatorUpdateListener, TypeEvaluator<Any> {
-
-        private var targetView: WeakReference<View>? = null
-        private val clipBounds = Rect()
-
-        override fun onAnimationStart(animation: Animator) {
-            val target = onGetTarget.invoke(animation) ?: return
-            targetView = WeakReference(target as View)
-        }
-
-        override fun onAnimationEnd(animation: Animator) {
-        }
-
-        override fun onAnimationCancel(animation: Animator) {
-        }
-
-        override fun onAnimationRepeat(animation: Animator) {
-        }
-
-        override fun evaluate(fraction: Float, startValue: Any?, endValue: Any?): Any {
-            val target = targetView?.get() ?: return 0
-            return -(target.width * fraction).apply {
-                Log.d(TAG, "evaluate return $this")
-            }
-        }
-
-        override fun onAnimationUpdate(animation: ValueAnimator) {
-            Log.d(TAG, "onAnimationUpdate ${animation.animatedValue}")
-            targetView?.get()?.let { view  ->
-                val dx = animation.animatedValue as Float
-                val left = max(0F, -dx) // 计算裁剪左边界
-                clipBounds.set(left.toInt(), 0, view.width, view.height)
-                view.clipBounds = clipBounds
-            }
-        }
-
     }
 
 }

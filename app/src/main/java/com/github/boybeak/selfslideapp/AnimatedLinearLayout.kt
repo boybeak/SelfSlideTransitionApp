@@ -46,9 +46,12 @@ class AnimatedLinearLayout : LinearLayout {
         ).apply {
             setEvaluator { fraction, startValue, endValue ->
                 val target = appearingTarget
-                target?.let { view ->
+                val value = target?.let { view ->
                     -view.width * (1 - fraction)
                 }?: 0f
+                value.apply {
+//                    Log.d(TAG, "evaluator return $this")
+                }
             }
         }
         transition.setAnimator(LayoutTransition.APPEARING, appearAnim)

@@ -8,10 +8,10 @@ import android.animation.ValueAnimator
 import android.os.Build
 import android.util.Log
 
-class ProxyAnimator(
+class AppearProxyAnimator(
     private val animator: ValueAnimator,
     private val onSetTarget: (animator: Animator, target: Any?) -> Unit
-    ) : ValueAnimator() {
+    ) : Animator() {
 
         companion object {
             private const val TAG = "ProxyAnimator"
@@ -25,7 +25,7 @@ class ProxyAnimator(
             animator.startDelay = startDelay
         }
 
-        override fun setDuration(duration: Long): ValueAnimator {
+        override fun setDuration(duration: Long): Animator {
             animator.duration = duration
             return this
         }
@@ -47,8 +47,8 @@ class ProxyAnimator(
             animator.setTarget(target)
         }
 
-        override fun clone(): ValueAnimator {
-            return ProxyAnimator(animator.clone(), onSetTarget)
+        override fun clone(): Animator {
+            return AppearProxyAnimator(animator.clone(), onSetTarget)
         }
 
         override fun start() {
@@ -122,87 +122,4 @@ class ProxyAnimator(
         override fun setupEndValues() {
             animator.setupEndValues()
         }
-
-        override fun setIntValues(vararg values: Int) {
-            animator.setIntValues(*values)
-        }
-
-        override fun setFloatValues(vararg values: Float) {
-            animator.setFloatValues(*values)
-        }
-
-        override fun setObjectValues(vararg values: Any?) {
-            animator.setObjectValues(*values)
-        }
-
-        override fun setValues(vararg values: PropertyValuesHolder?) {
-            animator.setValues(*values)
-        }
-
-        override fun getValues(): Array<PropertyValuesHolder> {
-            return animator.values
-        }
-
-        override fun setCurrentPlayTime(playTime: Long) {
-            animator.setCurrentPlayTime(playTime)
-        }
-
-        override fun setCurrentFraction(fraction: Float) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                animator.setCurrentFraction(fraction)
-            }
-        }
-
-        override fun getCurrentPlayTime(): Long {
-            return animator.getCurrentPlayTime()
-        }
-
-        override fun getAnimatedValue(): Any {
-            return animator.getAnimatedValue()
-        }
-
-        override fun getAnimatedValue(propertyName: String?): Any {
-            return animator.getAnimatedValue(propertyName)
-        }
-
-        override fun setRepeatCount(value: Int) {
-            animator.repeatCount = value
-        }
-
-        override fun getRepeatCount(): Int {
-            return animator.repeatCount
-        }
-
-        override fun setRepeatMode(value: Int) {
-            animator.repeatMode = value
-        }
-
-        override fun getRepeatMode(): Int {
-            return animator.repeatMode
-        }
-
-        override fun addUpdateListener(listener: AnimatorUpdateListener?) {
-            animator.addUpdateListener(listener)
-        }
-
-        override fun removeAllUpdateListeners() {
-            animator.removeAllUpdateListeners()
-        }
-
-        override fun removeUpdateListener(listener: AnimatorUpdateListener?) {
-            animator.removeUpdateListener(listener)
-        }
-
-        override fun setEvaluator(value: TypeEvaluator<*>?) {
-            animator.setEvaluator(value)
-        }
-
-        override fun reverse() {
-            animator.reverse()
-        }
-
-        override fun getAnimatedFraction(): Float {
-            return animator.animatedFraction
-        }
-
     }
